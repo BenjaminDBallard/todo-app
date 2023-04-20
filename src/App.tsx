@@ -1,35 +1,70 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { nanoid } from "nanoid";
+import Todo from "./components/Todo";
+import Form from "./components/Form";
 
-function App() {
-  const [count, setCount] = useState(0)
+function App(props: any) {
+
+  const [tasks, setTasks] = useState(props.tasks);
+
+  function addTask(name: any) {
+    const newTask = {id: `todo-${nanoid()}`, name, completed: false}
+    setTasks([...tasks, newTask])
+  }
+
+  function toggleTaskCompleted(id: string) {
+    const updatedTasks = tasks.map((task: any) => {
+      if(id === task.id){
+        return {...task, completed: !task.completed}
+      }
+      return task;
+    })
+    setTasks(updatedTasks)
+  }
+
+  function editTask(id: string, newName: string) {
+    const editedTaskList = tasks.map((task: any) => {
+      if (id === task.id) {
+        return {...task, name: newName}
+      }
+      return task;
+    });
+    setTasks(editedTaskList);
+  }
+
+  function deleteTask(id: string) {
+    const remainingTasks = tasks.filter((task: any) => id !== task.id);
+    setTasks(remainingTasks);
+  }
+
+  const taskList = tasks.map((task: any) => (
+    <Todo
+    id={task.id}
+    name={task.name}
+    completed={task.completed}
+    key={task.id}
+    toggleTaskCompleted={toggleTaskCompleted}
+    editTask={editTask}
+    deleteTask={deleteTask}
+    />
+  ));
+
+  const tasksNoun = taskList.length !== 1 ? 'tasks' : 'task';
+  const headingText = `${taskList.length} ${tasksNoun} remaining`;
 
   return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+    <div className="todoapp stack-large">
+      <h1>TodoList</h1>
+      <Form addTask={addTask} />
+      <h2 id="list-heading">{headingText}</h2>
+      <ul
+        role="list"
+        className="todo-list stack-large stack-exception"
+        aria-labelledby="list-heading">
+        {taskList}
+      </ul>
     </div>
-  )
+  );
 }
 
 export default App
